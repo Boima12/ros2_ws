@@ -24,5 +24,5 @@ git add .
 git commit -m "any message"
 git checkout main
 git fetch --all --prune
-git pull
+git pull origin main
 ```
