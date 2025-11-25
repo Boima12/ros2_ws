@@ -23,6 +23,6 @@ cập nhật mới nhất từ GitHub
 git add .
 git commit -m "any message"
 git checkout main
-git fetch --all
+git fetch --all --prune
 git pull
 ```
