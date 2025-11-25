@@ -20,9 +20,9 @@ git push origin new_branch
 cập nhật mới nhất từ GitHub
 
 ```
-git add .
-git commit -m "any message"
+git restore .
 git checkout main
 git fetch --all --prune
 git pull origin main
+git branch -vv | grep ': gone]' | awk '{print $1}' | xargs git branch -D
 ```
