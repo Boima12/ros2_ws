@@ -34,16 +34,4 @@ src/pure_pursuit_controller/src/control_node.cpp - Đây là file code C++, là 
 <br> <br> <br> <br> <br>
 <hr>
 
-### Cách build và chạy node
-- chạy node <br>
-```
-cd ~/ros2_ws
-colcon build --symlink-install
-source install/setup.bash
-ros2 run pure_pursuit_controller control_node
-```
 
-- kiểm tra node hoạt động <br>
-```
-rqt_graph
-```
