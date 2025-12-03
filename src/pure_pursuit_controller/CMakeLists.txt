@@ -29,3 +29,8 @@ install(TARGETS
 
 ament_package()
 
+# Install URDF and World directories
+install(
+  DIRECTORY urdf worlds launch
+  DESTINATION share/${PROJECT_NAME}
+)
