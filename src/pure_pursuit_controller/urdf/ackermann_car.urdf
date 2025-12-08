@@ -72,7 +72,8 @@
 
   <link name="front_right_wheel">
     <visual><geometry><cylinder length="0.04" radius="0.06"/></geometry><material name="black"/></visual>
-    <visual><geometry><cylinder length="0.042" radius="0.04"/></geometry><material name="white"/></visual>
+
+<visual><geometry><cylinder length="0.042" radius="0.04"/></geometry><material name="white"/></visual>
     <collision><geometry><cylinder length="0.04" radius="0.06"/></geometry></collision>
     <inertial>
       <mass value="1.0"/>
