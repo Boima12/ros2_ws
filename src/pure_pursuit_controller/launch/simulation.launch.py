@@ -29,11 +29,10 @@ def generate_launch_description():
         executable='create',
         arguments=[
             '-string', robot_desc,
-            '-name', 'ackermann_bot',
 	    '-name', 'ackermann_bot',
             # VỊ TRÍ SỬA ĐỔI:
             '-x', '0.0',    # Đặt xe trùng trục X với vạch xuất phát
-            '-y', '-2.5',   # Đặt xe lùi lại một chút so với tâm vòng tròn trái (y=-3.0) để nằm gọn trên đường
+            '-y', '0.0',   # Đặt xe lùi lại một chút so với tâm vòng tròn trái (y=-3.0) để nằm gọn trên đường
             '-z', '0.25',   # QUAN TRỌNG: Mặt đường cao 0.2. Thả ở 0.25 là xe vừa chạm đất, không bị nảy.
             '-Y', '0.0'     # Góc quay (Yaw). 0.0 là đầu xe hướng về phía dương trục X
         ],

@@ -2,8 +2,7 @@
 #include <cmath>
 #include <vector>
 #include <algorithm>
-
-// CÁC STRUCT VÀ CLASS CỦA THUẬT TOÁN ĐIỀU KHIỂN
+#include <limits>
 
 struct Point {
     double x;
@@ -13,47 +12,63 @@ struct Point {
 class PurePursuit {
 public:
     PurePursuit() {
-        // Cấu hình thông số xe Ackermann
-        wheelbase_ = 0.33;      
-        k_gain_ = 0.5;          
-        min_lookahead_ = 1.0;   
-        max_steering_angle_ = 0.78; // ~45 độ
+        wheelbase_ = 0.33;
+        k_gain_ = 0.6;           // Tinh chỉnh cực chuẩn
+        min_lookahead_ = 2.5;       // 0.9m là HOÀN HẢO cho hình số 8 nhỏ
+        max_steering_angle_ = 0.78;
     }
 
-    double calculate_lookahead_distance(double current_velocity) {
-        double speed = std::abs(current_velocity);
-        return (k_gain_ * speed) + min_lookahead_;
+    double calculate_lookahead_distance(double v) {
+        return k_gain_ * std::abs(v) + min_lookahead_;
     }
 
-    Point find_lookahead_point(double robot_x, double robot_y, const std::vector<Point>& path, double Ld) {
-        (void)robot_x; (void)robot_y; (void)Ld; 
-        if (path.empty()) return {0.0, 0.0};
-        // Trong phiên bản test, chúng ta chỉ lấy điểm đầu tiên trong path làm mục tiêu
-        return path[0]; 
+    Point find_lookahead_point(double x, double y, size_t progress, const std::vector<Point>& path, double Ld) {
+        if (path.empty()) return {x, y};
+
+        Point best = path[progress % path.size()];
+        double best_dist = std::numeric_limits<double>::max();
+
+        for (size_t i = progress; i < progress + path.size(); ++i) {
+            size_t idx = i % path.size();
+            double d = std::hypot(path[idx].x - x, path[idx].y - y);
+            if (d >= Ld && d < best_dist) {
+                best_dist = d;
+                best = path[idx];
+            }
+        }
+        return best;
     }
 
-    double calculate_steering(double robot_x, double robot_y, double robot_yaw, double current_velocity, const std::vector<Point>& path) {
-        double Ld = calculate_lookahead_distance(current_velocity);
-        Point target = find_lookahead_point(robot_x, robot_y, path, Ld);
+    size_t update_progress(double x, double y, const std::vector<Point>& path) {
+        if (path.empty()) return 0;
+        double min_d = 1e9;
+        size_t idx = 0;
+        for (size_t i = 0; i < path.size(); ++i) {
+            double d = std::hypot(path[i].x - x, path[i].y - y);
+            if (d < min_d) {
+                min_d = d;
+                idx = i;
+            }
+        }
+        return idx;
+    }
 
-        double dx = target.x - robot_x;
-        double dy = target.y - robot_y;
-        
-        // Chuyển đổi sang hệ tọa độ của xe (robot_yaw)
-        double local_y = -std::sin(robot_yaw) * dx + std::cos(robot_yaw) * dy;
+    double calculate_steering(double x, double y, double yaw, double v, const std::vector<Point>& path, size_t& progress) {
+        progress = update_progress(x, y, path);
+        double Ld = calculate_lookahead_distance(v);
+        Point target = find_lookahead_point(x, y, progress, path, Ld);
 
-        double dist_sq = dx*dx + dy*dy;
-        // Công thức tính độ cong (curvature)
-        double curvature = (2.0 * local_y) / dist_sq;
-        
-        // Công thức tính góc lái (Steering Angle)
-        double steering_angle = std::atan(curvature * wheelbase_);
+        double dx = target.x - x;
+        double dy = target.y - y;
+        double local_x =  cos(yaw) * dx + sin(yaw) * dy;
+        double local_y = -sin(yaw) * dx + cos(yaw) * dy;
 
-        // Kẹp góc lái trong giới hạn
-        if (steering_angle > max_steering_angle_) steering_angle = max_steering_angle_;
-        if (steering_angle < -max_steering_angle_) steering_angle = -max_steering_angle_;
+        double alpha = atan2(local_y, local_x);
+        double curvature = 2.0 * sin(alpha) / Ld;
+        double steer = atan(curvature * wheelbase_);
 
-        return steering_angle;
+        steer = std::clamp(steer, -max_steering_angle_, max_steering_angle_);
+        return steer;
     }
 
 private:
@@ -62,3 +77,4 @@ private:
     double min_lookahead_;
     double max_steering_angle_;
 };
+
