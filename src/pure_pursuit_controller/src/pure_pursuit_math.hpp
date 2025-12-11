@@ -25,17 +25,19 @@ public:
     Point find_lookahead_point(double x, double y, size_t progress, const std::vector<Point>& path, double Ld) {
         if (path.empty()) return {x, y};
 
-        // Start searching from current progress, not from progress index directly
         Point best = path[progress % path.size()];
         double best_dist = std::numeric_limits<double>::max();
 
-        // Search within a window to avoid jumping to far-away waypoints
-        size_t search_window = std::min(size_t(15), path.size());
-        for (size_t i = 0; i < search_window; ++i) {
+        // Search forward through the entire path until we find the first point beyond Ld.
+        // This keeps the target in front of the vehicle along the path order.
+        for (size_t i = 0; i < path.size(); ++i) {
             size_t idx = (progress + i) % path.size();
             double d = std::hypot(path[idx].x - x, path[idx].y - y);
-            // Find the first point that's at least Ld away
-            if (d >= Ld && d < best_dist) {
+            if (d >= Ld) {
+                best = path[idx];
+                break;
+            }
+            if (d < best_dist) {
                 best_dist = d;
                 best = path[idx];
             }
@@ -45,19 +47,35 @@ public:
 
     size_t update_progress(double x, double y, size_t current_progress, const std::vector<Point>& path) {
         if (path.empty()) return 0;
-        
-        // Only update progress if we're getting closer to the next waypoint
-        size_t next_idx = (current_progress + 1) % path.size();
-        size_t curr_idx = current_progress % path.size();
-        
-        // double dist_to_current = std::hypot(path[curr_idx].x - x, path[curr_idx].y - y);
-        double dist_to_next = std::hypot(path[next_idx].x - x, path[next_idx].y - y);
-        
-        // Move to next waypoint when within 0.5m
-        if (dist_to_next < 0.5) {
-            return (current_progress + 1) % path.size();
+
+        // Pick the nearest waypoint to the current pose
+        size_t nearest_idx = 0;
+        double best_dist = std::numeric_limits<double>::max();
+        for (size_t i = 0; i < path.size(); ++i) {
+            double d = std::hypot(path[i].x - x, path[i].y - y);
+            if (d < best_dist) {
+                best_dist = d;
+                nearest_idx = i;
+            }
         }
-        
+
+        // Ensure progress moves forward along the path: allow small jumps ahead, but never backwards.
+        // If nearest is behind (wrap-around), keep current; otherwise advance to nearest.
+        size_t forward_window = 10; // allow skipping up to 10 waypoints ahead
+        size_t max_idx = (current_progress + forward_window) % path.size();
+        bool wrap = (current_progress + forward_window) >= path.size();
+
+        if (!wrap) {
+            if (nearest_idx >= current_progress && nearest_idx <= max_idx) {
+                return nearest_idx;
+            }
+        } else {
+            // window wraps around end of vector
+            if (nearest_idx >= current_progress || nearest_idx <= max_idx) {
+                return nearest_idx;
+            }
+        }
+
         return current_progress;
     }
 
