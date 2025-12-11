@@ -11,7 +11,6 @@
 #include "ament_index_cpp/get_package_share_directory.hpp"
 #include "nav_msgs/msg/odometry.hpp"
 #include "geometry_msgs/msg/twist.hpp"
-#include "std_msgs/msg/float64.hpp"
 #include "pure_pursuit_math.hpp"
 
 using std::placeholders::_1;
@@ -25,9 +24,7 @@ public:
     subscription_ = this->create_subscription<nav_msgs::msg::Odometry>(
       "/odometry", 10, std::bind(&PurePursuitNode::odom_callback, this, _1));
 
-    drive_publisher_ = this->create_publisher<geometry_msgs::msg::Twist>("/ackermann_cmd", 10);
-    steer_left_publisher_ = this->create_publisher<std_msgs::msg::Float64>("/steering_left", 10);
-    steer_right_publisher_ = this->create_publisher<std_msgs::msg::Float64>("/steering_right", 10);
+    publisher_ = this->create_publisher<geometry_msgs::msg::Twist>("/cmd_vel", 10);
 
     timer_ = this->create_wall_timer(50ms, std::bind(&PurePursuitNode::timer_callback, this));
 
@@ -110,23 +107,18 @@ private:
                     current_progress_, path_to_follow_.size(), steer, final_steer, current_x_, current_y_);
     }
 
-    // Publish drive command (differential drive uses angular.z for turning)
-    auto drive_msg = geometry_msgs::msg::Twist();
-    drive_msg.linear.x = target_speed;
-    drive_msg.angular.z = 0.0;  // Let steering joints handle turning
-    drive_publisher_->publish(drive_msg);
+    // Convert steering angle to angular velocity for differential drive
+    // For diff drive: angular_velocity ≈ linear_velocity * tan(steering_angle) / wheelbase
+    double angular_vel = (target_speed * std::tan(final_steer)) / 0.30;
     
-    // Publish steering angles to both front wheels
-    auto steer_msg = std_msgs::msg::Float64();
-    steer_msg.data = final_steer;
-    steer_left_publisher_->publish(steer_msg);
-    steer_right_publisher_->publish(steer_msg);
+    auto msg = geometry_msgs::msg::Twist();
+    msg.linear.x = target_speed;
+    msg.angular.z = angular_vel;
+    publisher_->publish(msg);
   }
 
   rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr subscription_;
-  rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr drive_publisher_;
-  rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr steer_left_publisher_;
-  rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr steer_right_publisher_;
+  rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr publisher_;
   rclcpp::TimerBase::SharedPtr timer_;
   
   PurePursuit algorithm_;

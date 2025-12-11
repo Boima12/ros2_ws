@@ -95,26 +95,10 @@
       <wheel_separation>0.3</wheel_separation>
       <wheel_radius>0.06</wheel_radius>
       <odom_publish_frequency>50</odom_publish_frequency>
-      <topic>/ackermann_cmd</topic>
+      <topic>/cmd_vel</topic>
       <odom_topic>/odometry</odom_topic>
       <frame_id>odom</frame_id>
       <child_frame_id>base_link</child_frame_id>
-    </plugin>
-    
-    <plugin filename="gz-sim-joint-position-controller-system" name="gz::sim::systems::JointPositionController">
-      <joint_name>front_left_steer_joint</joint_name>
-      <topic>/steering_left</topic>
-      <p_gain>10</p_gain>
-      <i_gain>0.1</i_gain>
-      <d_gain>0.5</d_gain>
-    </plugin>
-    
-    <plugin filename="gz-sim-joint-position-controller-system" name="gz::sim::systems::JointPositionController">
-      <joint_name>front_right_steer_joint</joint_name>
-      <topic>/steering_right</topic>
-      <p_gain>10</p_gain>
-      <i_gain>0.1</i_gain>
-      <d_gain>0.5</d_gain>
     </plugin>
   </gazebo>
 
