@@ -13,9 +13,9 @@ class PurePursuit {
 public:
     PurePursuit() {
         wheelbase_ = 0.30;       // Match URDF: front_wheel(0.15) - rear_wheel(-0.15) = 0.30
-        k_gain_ = 0.6;           // Speed-dependent lookahead gain
-        min_lookahead_ = 1.5;    // Large lookahead for smooth curved tracking
-        max_steering_angle_ = 0.6;  // Allow moderate steering for curves
+        k_gain_ = 0.8;           // Speed-dependent lookahead gain
+        min_lookahead_ = 2.0;    // Very large lookahead = very smooth, gentle turns
+        max_steering_angle_ = 0.4;  // Limit steering to prevent aggressive turns
     }
 
     double calculate_lookahead_distance(double v) {
@@ -48,12 +48,13 @@ public:
     size_t update_progress(double x, double y, size_t current_progress, const std::vector<Point>& path) {
         if (path.empty()) return 0;
 
-        // Check if we're close enough to the NEXT waypoint to advance
+        // Check if we've passed the current waypoint by looking ahead
         size_t next_idx = (current_progress + 1) % path.size();
         double dist_to_next = std::hypot(path[next_idx].x - x, path[next_idx].y - y);
         
-        // If within 0.5m of next waypoint, advance to it
-        if (dist_to_next < 0.5) {
+        // Use larger threshold (0.8m) since waypoints are 0.4-0.8m apart
+        // This allows progress even with oscillation
+        if (dist_to_next < 0.8) {
             return next_idx;
         }
         

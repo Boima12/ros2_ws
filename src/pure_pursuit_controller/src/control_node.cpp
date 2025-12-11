@@ -108,8 +108,8 @@ private:
     }
 
     // Convert steering angle to angular velocity for differential drive
-    // Reduced gain from 5.0 to reduce oscillation/snake behavior
-    double angular_vel = final_steer * 2.5;
+    // Low gain (1.5) to minimize oscillation and wobbling
+    double angular_vel = final_steer * 1.5;
     
     auto msg = geometry_msgs::msg::Twist();
     msg.linear.x = target_speed;
