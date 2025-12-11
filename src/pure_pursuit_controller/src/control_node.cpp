@@ -5,6 +5,7 @@
 #include <fstream>
 #include <string>
 #include <cmath>
+#include <limits>
 
 #include "rclcpp/rclcpp.hpp"
 #include "ament_index_cpp/get_package_share_directory.hpp"
@@ -63,6 +64,21 @@ private:
     double siny_cosp = 2.0 * (qw * qz + qx * qy);
     double cosy_cosp = 1.0 - 2.0 * (qy * qy + qz * qz);
     current_yaw_ = std::atan2(siny_cosp, cosy_cosp);
+
+    // Lazily set initial progress to the closest waypoint once odom is available
+    if (!progress_initialized_ && !path_to_follow_.empty()) {
+      double best_dist = std::numeric_limits<double>::max();
+      size_t best_idx = 0;
+      for (size_t i = 0; i < path_to_follow_.size(); ++i) {
+        double d = std::hypot(path_to_follow_[i].x - current_x_, path_to_follow_[i].y - current_y_);
+        if (d < best_dist) {
+          best_dist = d;
+          best_idx = i;
+        }
+      }
+      current_progress_ = best_idx;
+      progress_initialized_ = true;
+    }
   }
 
   void timer_callback()
@@ -75,7 +91,7 @@ private:
         current_x_, current_y_, current_yaw_, target_speed, path_to_follow_, current_progress_);
 
     if (std::isnan(steer)) steer = 0.0;
-    double final_steer = -steer;  // Xe bạn ngược dấu chuẩn
+    double final_steer = steer;
 
     // RESET VÒNG KHI ĐÃ QUA 90% PATH VÀ GẦN (0,0)
     if (current_progress_ > path_to_follow_.size() * 0.9 &&
@@ -104,6 +120,7 @@ private:
   PurePursuit algorithm_;
   std::vector<Point> path_to_follow_;
   size_t current_progress_ = 0;
+  bool progress_initialized_ = false;
   
   double current_x_ = 0.0;
   double current_y_ = 0.0;

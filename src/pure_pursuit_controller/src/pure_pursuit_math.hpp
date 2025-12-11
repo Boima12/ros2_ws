@@ -50,7 +50,7 @@ public:
         size_t next_idx = (current_progress + 1) % path.size();
         size_t curr_idx = current_progress % path.size();
         
-        double dist_to_current = std::hypot(path[curr_idx].x - x, path[curr_idx].y - y);
+        // double dist_to_current = std::hypot(path[curr_idx].x - x, path[curr_idx].y - y);
         double dist_to_next = std::hypot(path[next_idx].x - x, path[next_idx].y - y);
         
         // Move to next waypoint when within 0.5m
