@@ -13,9 +13,9 @@ class PurePursuit {
 public:
     PurePursuit() {
         wheelbase_ = 0.30;       // Match URDF: front_wheel(0.15) - rear_wheel(-0.15) = 0.30
-        k_gain_ = 0.8;           // Speed-dependent lookahead gain
-        min_lookahead_ = 2.0;    // Very large lookahead = very smooth, gentle turns
-        max_steering_angle_ = 0.4;  // Limit steering to prevent aggressive turns
+        k_gain_ = 0.4;           // Lower gain for tighter tracking
+        min_lookahead_ = 1.0;    // Shorter lookahead to follow figure-8 curves around pillars
+        max_steering_angle_ = 0.5;  // Allow more steering for tight turns
     }
 
     double calculate_lookahead_distance(double v) {

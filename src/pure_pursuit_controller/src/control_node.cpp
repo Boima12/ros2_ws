@@ -100,16 +100,18 @@ private:
         RCLCPP_INFO(this->get_logger(), "HOÀN THÀNH 1 VÒNG HÌNH SỐ 8! RESET PROGRESS → 0");
     }
 
-    // Debug
+    // Debug - log 2 times per second (every 10 iterations at 50ms = 500ms)
     static int count = 0;
-    if (++count % 100 == 0) {
-        RCLCPP_INFO(this->get_logger(), "Progress: %zu/%zu | Steer: %.3f → %.3f | Pos: (%.2f, %.2f)",
-                    current_progress_, path_to_follow_.size(), steer, final_steer, current_x_, current_y_);
+    if (++count % 10 == 0) {
+        RCLCPP_INFO(this->get_logger(), "WP[%zu/%zu] Target:(%.2f,%.2f) Car:(%.2f,%.2f) Steer:%.3f Yaw:%.2f",
+                    current_progress_, path_to_follow_.size(),
+                    path_to_follow_[current_progress_].x, path_to_follow_[current_progress_].y,
+                    current_x_, current_y_, final_steer, current_yaw_);
     }
 
     // Convert steering angle to angular velocity for differential drive
-    // Low gain (1.5) to minimize oscillation and wobbling
-    double angular_vel = final_steer * 1.5;
+    // Moderate gain (2.0) to follow tight figure-8 curves
+    double angular_vel = final_steer * 2.0;
     
     auto msg = geometry_msgs::msg::Twist();
     msg.linear.x = target_speed;
