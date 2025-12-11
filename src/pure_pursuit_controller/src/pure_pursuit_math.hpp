@@ -12,7 +12,7 @@ struct Point {
 class PurePursuit {
 public:
     PurePursuit() {
-        wheelbase_ = 0.33;
+        wheelbase_ = 0.30;       // Match URDF: front_wheel(0.15) - rear_wheel(-0.15) = 0.30
         k_gain_ = 0.3;           // Reduced from 0.6 for smoother steering
         min_lookahead_ = 0.8;    // Reduced from 2.5 - was way too large for figure-8
         max_steering_angle_ = 0.78;

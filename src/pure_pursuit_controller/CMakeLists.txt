@@ -30,10 +30,16 @@ install(TARGETS
   DESTINATION lib/${PROJECT_NAME}
 )
 
-# Cài đặt thư mục launch, urdf, worlds, src (để lệnh ros2 launch chạy được)
+# Cài đặt thư mục launch, urdf, worlds, src, config (để lệnh ros2 launch chạy được)
 install(
-  DIRECTORY launch urdf worlds src
+  DIRECTORY launch urdf worlds src config
   DESTINATION share/${PROJECT_NAME}
+)
+
+# Install Python test script
+install(PROGRAMS
+  src/test_steering.py
+  DESTINATION lib/${PROJECT_NAME}
 )
 
 ament_package()
