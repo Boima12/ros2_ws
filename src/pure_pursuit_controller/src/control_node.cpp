@@ -7,6 +7,7 @@
 #include <cmath>
 
 #include "rclcpp/rclcpp.hpp"
+#include "ament_index_cpp/get_package_share_directory.hpp"
 #include "nav_msgs/msg/odometry.hpp"
 #include "geometry_msgs/msg/twist.hpp"
 #include "pure_pursuit_math.hpp"
@@ -26,7 +27,9 @@ public:
 
     timer_ = this->create_wall_timer(50ms, std::bind(&PurePursuitNode::timer_callback, this));
 
-    std::string file_path = "/home/hoi/ros2_ws/src/pure_pursuit_controller/src/waypoints.txt";
+    // Dynamically resolve waypoints file path from package share directory
+    auto package_share_dir = ament_index_cpp::get_package_share_directory("pure_pursuit_controller");
+    std::string file_path = package_share_dir + "/src/waypoints.txt";
     load_waypoints_from_file(file_path);
 
     RCLCPP_INFO(this->get_logger(), "Pure Pursuit node khởi động! Chờ odometry...");

@@ -10,6 +10,7 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED) # <--- BẮT BUỘC PHẢI CÓ
+find_package(ament_index_cpp REQUIRED)
 
 # 2. Tạo file thực thi
 # (Không cần include_directories(src) nếu file .hpp nằm cạnh file .cpp)
@@ -20,6 +21,7 @@ ament_target_dependencies(control_node
   rclcpp
   nav_msgs
   geometry_msgs # <--- BẮT BUỘC PHẢI CÓ ĐỂ DÙNG TWIST
+  ament_index_cpp
 )
 
 # 4. Cài đặt
