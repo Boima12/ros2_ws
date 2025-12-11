@@ -108,8 +108,9 @@ private:
     }
 
     // Convert steering angle to angular velocity for differential drive
-    // For diff drive: angular_velocity ≈ linear_velocity * tan(steering_angle) / wheelbase
-    double angular_vel = (target_speed * std::tan(final_steer)) / 0.30;
+    // Use a much larger gain factor since steering angles are small (typically < 0.3 rad)
+    // but we need significant angular velocity for turning
+    double angular_vel = final_steer * 3.0;  // Amplify steering command significantly
     
     auto msg = geometry_msgs::msg::Twist();
     msg.linear.x = target_speed;
