@@ -85,7 +85,7 @@ private:
   {
     if (path_to_follow_.empty()) return;
 
-    double target_speed = 0.3;  // Reduced from 0.8 for testing
+    double target_speed = 0.5;  // Moderate speed for smooth figure-8 tracking
 
     double steer = algorithm_.calculate_steering(
         current_x_, current_y_, current_yaw_, target_speed, path_to_follow_, current_progress_);
@@ -108,9 +108,8 @@ private:
     }
 
     // Convert steering angle to angular velocity for differential drive
-    // Use a much larger gain factor since steering angles are small (typically < 0.3 rad)
-    // but we need significant angular velocity for turning
-    double angular_vel = final_steer * 3.0;  // Amplify steering command significantly
+    // Reduced gain from 5.0 to reduce oscillation/snake behavior
+    double angular_vel = final_steer * 2.5;
     
     auto msg = geometry_msgs::msg::Twist();
     msg.linear.x = target_speed;
