@@ -13,9 +13,9 @@ class PurePursuit {
 public:
     PurePursuit() {
         wheelbase_ = 0.30;       // Match URDF: front_wheel(0.15) - rear_wheel(-0.15) = 0.30
-        k_gain_ = 0.5;           // Speed-dependent lookahead gain
-        min_lookahead_ = 1.2;    // Larger lookahead = smoother turns, less oscillation
-        max_steering_angle_ = 0.5;  // Limit max steering to reduce sharp turns
+        k_gain_ = 0.6;           // Speed-dependent lookahead gain
+        min_lookahead_ = 1.5;    // Large lookahead for smooth curved tracking
+        max_steering_angle_ = 0.6;  // Allow moderate steering for curves
     }
 
     double calculate_lookahead_distance(double v) {
@@ -48,34 +48,16 @@ public:
     size_t update_progress(double x, double y, size_t current_progress, const std::vector<Point>& path) {
         if (path.empty()) return 0;
 
-        // Pick the nearest waypoint to the current pose
-        size_t nearest_idx = 0;
-        double best_dist = std::numeric_limits<double>::max();
-        for (size_t i = 0; i < path.size(); ++i) {
-            double d = std::hypot(path[i].x - x, path[i].y - y);
-            if (d < best_dist) {
-                best_dist = d;
-                nearest_idx = i;
-            }
+        // Check if we're close enough to the NEXT waypoint to advance
+        size_t next_idx = (current_progress + 1) % path.size();
+        double dist_to_next = std::hypot(path[next_idx].x - x, path[next_idx].y - y);
+        
+        // If within 0.5m of next waypoint, advance to it
+        if (dist_to_next < 0.5) {
+            return next_idx;
         }
-
-        // Ensure progress moves forward along the path: allow small jumps ahead, but never backwards.
-        // If nearest is behind (wrap-around), keep current; otherwise advance to nearest.
-        size_t forward_window = 10; // allow skipping up to 10 waypoints ahead
-        size_t max_idx = (current_progress + forward_window) % path.size();
-        bool wrap = (current_progress + forward_window) >= path.size();
-
-        if (!wrap) {
-            if (nearest_idx >= current_progress && nearest_idx <= max_idx) {
-                return nearest_idx;
-            }
-        } else {
-            // window wraps around end of vector
-            if (nearest_idx >= current_progress || nearest_idx <= max_idx) {
-                return nearest_idx;
-            }
-        }
-
+        
+        // Otherwise stay at current waypoint
         return current_progress;
     }
 

@@ -85,7 +85,7 @@ private:
   {
     if (path_to_follow_.empty()) return;
 
-    double target_speed = 0.5;  // Moderate speed for smooth figure-8 tracking
+    double target_speed = 0.4;  // Slower speed for better curved path tracking
 
     double steer = algorithm_.calculate_steering(
         current_x_, current_y_, current_yaw_, target_speed, path_to_follow_, current_progress_);
