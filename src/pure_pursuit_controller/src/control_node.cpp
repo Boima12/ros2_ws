@@ -117,6 +117,12 @@ private:
     msg.linear.x = target_speed;
     msg.angular.z = angular_vel;
     publisher_->publish(msg);
+    
+    // Log commands being sent every 20 iterations
+    static int cmd_count = 0;
+    if (++cmd_count % 20 == 0) {
+        RCLCPP_WARN(this->get_logger(), "CMD: linear.x=%.3f angular.z=%.3f", msg.linear.x, msg.angular.z);
+    }
   }
 
   rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr subscription_;
