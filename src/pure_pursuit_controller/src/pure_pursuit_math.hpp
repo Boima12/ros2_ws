@@ -92,6 +92,8 @@ public:
         double local_y = -sin(yaw) * dx + cos(yaw) * dy;
 
         double alpha = atan2(local_y, local_x);
+        
+
         double curvature = 2.0 * sin(alpha) / Ld;
         double steer = atan(curvature * wheelbase_);
 
