@@ -13,8 +13,8 @@ class PurePursuit {
 public:
     PurePursuit() {
         wheelbase_ = 0.33;
-        k_gain_ = 0.6;           // Tinh chỉnh cực chuẩn
-        min_lookahead_ = 2.5;       // 0.9m là HOÀN HẢO cho hình số 8 nhỏ
+        k_gain_ = 0.3;           // Reduced from 0.6 for smoother steering
+        min_lookahead_ = 0.8;    // Reduced from 2.5 - was way too large for figure-8
         max_steering_angle_ = 0.78;
     }
 
@@ -25,12 +25,16 @@ public:
     Point find_lookahead_point(double x, double y, size_t progress, const std::vector<Point>& path, double Ld) {
         if (path.empty()) return {x, y};
 
+        // Start searching from current progress, not from progress index directly
         Point best = path[progress % path.size()];
         double best_dist = std::numeric_limits<double>::max();
 
-        for (size_t i = progress; i < progress + path.size(); ++i) {
-            size_t idx = i % path.size();
+        // Search within a window to avoid jumping to far-away waypoints
+        size_t search_window = std::min(size_t(15), path.size());
+        for (size_t i = 0; i < search_window; ++i) {
+            size_t idx = (progress + i) % path.size();
             double d = std::hypot(path[idx].x - x, path[idx].y - y);
+            // Find the first point that's at least Ld away
             if (d >= Ld && d < best_dist) {
                 best_dist = d;
                 best = path[idx];
@@ -39,22 +43,28 @@ public:
         return best;
     }
 
-    size_t update_progress(double x, double y, const std::vector<Point>& path) {
+    size_t update_progress(double x, double y, size_t current_progress, const std::vector<Point>& path) {
         if (path.empty()) return 0;
-        double min_d = 1e9;
-        size_t idx = 0;
-        for (size_t i = 0; i < path.size(); ++i) {
-            double d = std::hypot(path[i].x - x, path[i].y - y);
-            if (d < min_d) {
-                min_d = d;
-                idx = i;
-            }
+        
+        // Only update progress if we're getting closer to the next waypoint
+        size_t next_idx = (current_progress + 1) % path.size();
+        size_t curr_idx = current_progress % path.size();
+        
+        double dist_to_current = std::hypot(path[curr_idx].x - x, path[curr_idx].y - y);
+        double dist_to_next = std::hypot(path[next_idx].x - x, path[next_idx].y - y);
+        
+        // Move to next waypoint when within 0.5m
+        if (dist_to_next < 0.5) {
+            return (current_progress + 1) % path.size();
         }
-        return idx;
+        
+        return current_progress;
     }
 
     double calculate_steering(double x, double y, double yaw, double v, const std::vector<Point>& path, size_t& progress) {
-        progress = update_progress(x, y, path);
+        if (path.empty()) return 0.0;
+        
+        progress = update_progress(x, y, progress, path);
         double Ld = calculate_lookahead_distance(v);
         Point target = find_lookahead_point(x, y, progress, path, Ld);
 

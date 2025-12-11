@@ -30,9 +30,9 @@ install(TARGETS
   DESTINATION lib/${PROJECT_NAME}
 )
 
-# Cài đặt thư mục launch, urdf, worlds (để lệnh ros2 launch chạy được)
+# Cài đặt thư mục launch, urdf, worlds, src (để lệnh ros2 launch chạy được)
 install(
-  DIRECTORY launch urdf worlds
+  DIRECTORY launch urdf worlds src
   DESTINATION share/${PROJECT_NAME}
 )
 
