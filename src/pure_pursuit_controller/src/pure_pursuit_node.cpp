@@ -100,20 +100,29 @@ private:
 
         // Pure Pursuit Formula
         // Wheelbase L = 0.3 (approx)
-        double steering_angle = atan(2.0 * 0.3 * sin(alpha) / lookahead_distance_); 
+        double wheelbase = 0.3;
+        double steering_angle = atan(2.0 * wheelbase * sin(alpha) / lookahead_distance_);
+        
+        // Convert steering angle to angular velocity for Ackermann vehicle
+        // angular_velocity = (velocity * tan(steering_angle)) / wheelbase
+        double angular_velocity = (target_speed_ * tan(steering_angle)) / wheelbase;
+        
+        // Limit angular velocity to prevent too sharp turns
+        double max_angular_vel = 2.0;  // rad/s
+        angular_velocity = std::max(-max_angular_vel, std::min(max_angular_vel, angular_velocity));
 
         // 4. Debug Print (Only every 20th message to reduce spam)
         static int debug_counter = 0;
         if (debug_counter++ % 20 == 0) {
             RCLCPP_INFO(this->get_logger(), 
-                "Pos: (%.2f, %.2f) Yaw: %.2f | Target: (%.2f, %.2f) | Steer: %.2f",
-                current_x, current_y, current_yaw, target_point.x, target_point.y, steering_angle);
+                "Pos: (%.2f, %.2f) Yaw: %.2f | Target: (%.2f, %.2f) | Steer: %.2f | AngVel: %.2f",
+                current_x, current_y, current_yaw, target_point.x, target_point.y, steering_angle, angular_velocity);
         }
 
         // 5. Publish Command
         auto cmd = geometry_msgs::msg::Twist();
         cmd.linear.x = target_speed_;
-        cmd.angular.z = steering_angle;
+        cmd.angular.z = angular_velocity;
         publisher_->publish(cmd);
     }
 

@@ -84,7 +84,7 @@
       </link>
     </model>
 
-    <model name="cylinder_obstacle_1">
+    <!-- <model name="cylinder_obstacle_1">
       <static>true</static>
       <pose>-3 0 0.5 0 0 0</pose>
       <link name="link">
@@ -104,7 +104,7 @@
           <geometry><cylinder><radius>0.2</radius><length>1</length></cylinder></geometry>
           <material><diffuse>1 0.4 0.4 1</diffuse></material> </visual>
       </link>
-    </model>
+    </model> -->
 
   </world>
 </sdf>
