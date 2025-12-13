@@ -5,43 +5,28 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
-# 1. Tìm thư viện (Thêm geometry_msgs cho Twist)
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(geometry_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
-find_package(geometry_msgs REQUIRED) # <--- BẮT BUỘC PHẢI CÓ
-find_package(std_msgs REQUIRED)
+find_package(tf2 REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
 find_package(ament_index_cpp REQUIRED)
 
-# 2. Tạo file thực thi
-# (Không cần include_directories(src) nếu file .hpp nằm cạnh file .cpp)
-add_executable(control_node src/control_node.cpp)
+add_executable(pure_pursuit_node src/pure_pursuit_node.cpp)
+ament_target_dependencies(pure_pursuit_node rclcpp geometry_msgs nav_msgs tf2 tf2_geometry_msgs ament_index_cpp)
 
-# 3. Link thư viện
-ament_target_dependencies(control_node
-  rclcpp
-  nav_msgs
-  geometry_msgs # <--- BẮT BUỘC PHẢI CÓ ĐỂ DÙNG TWIST
-  std_msgs
-  ament_index_cpp
-)
-
-# 4. Cài đặt
 install(TARGETS
-  control_node
+  pure_pursuit_node
   DESTINATION lib/${PROJECT_NAME}
 )
 
-# Cài đặt thư mục launch, urdf, worlds, src, config (để lệnh ros2 launch chạy được)
-install(
-  DIRECTORY launch urdf worlds src config
+# Install directories (URDF, Worlds, Waypoints)
+install(DIRECTORY
+  urdf
+  worlds
+  src
   DESTINATION share/${PROJECT_NAME}
-)
-
-# Install Python test script
-install(PROGRAMS
-  src/test_steering.py
-  DESTINATION lib/${PROJECT_NAME}
 )
 
 ament_package()
