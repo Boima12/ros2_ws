@@ -18,8 +18,8 @@ class PurePursuitNode : public rclcpp::Node {
 public:
     PurePursuitNode() : Node("pure_pursuit_node") {
         // Tunable parameters
-        this->declare_parameter("lookahead_distance", 2.0); // Increased to 2.0 for smoother steering
-        this->declare_parameter("target_speed", 1.5);       
+        this->declare_parameter("lookahead_distance", 2.5); // Increased to 2.5 for obstacle avoidance
+        this->declare_parameter("target_speed", 1.2);       
         
         lookahead_distance_ = this->get_parameter("lookahead_distance").as_double();
         target_speed_ = this->get_parameter("target_speed").as_double();

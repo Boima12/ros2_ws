@@ -39,22 +39,22 @@
     
     <model name="wall_top">
       <static>true</static>
-      <pose>0 4.1 0.5 0 0 0</pose>
+      <pose>0 7.0 0.5 0 0 0</pose>
       <link name="link">
-        <collision name="c"><geometry><box><size>13.4 0.2 1</size></box></geometry></collision>
+        <collision name="c"><geometry><box><size>20.0 0.2 1</size></box></geometry></collision>
         <visual name="v">
-          <geometry><box><size>13.4 0.2 1</size></box></geometry>
+          <geometry><box><size>20.0 0.2 1</size></box></geometry>
           <material><diffuse>0.6 0.8 1.0 1</diffuse></material> </visual>
       </link>
     </model>
     
     <model name="wall_bottom">
       <static>true</static>
-      <pose>0 -4.1 0.5 0 0 0</pose>
+      <pose>0 -7.0 0.5 0 0 0</pose>
       <link name="link">
-        <collision name="c"><geometry><box><size>13.4 0.2 1</size></box></geometry></collision>
+        <collision name="c"><geometry><box><size>20.0 0.2 1</size></box></geometry></collision>
         <visual name="v">
-          <geometry><box><size>13.4 0.2 1</size></box></geometry>
+          <geometry><box><size>20.0 0.2 1</size></box></geometry>
           <material><diffuse>0.6 0.8 1.0 1</diffuse></material>
         </visual>
       </link>
@@ -62,11 +62,11 @@
 
     <model name="wall_left">
       <static>true</static>
-      <pose>-6.6 0 0.5 0 0 0</pose>
+      <pose>-10.0 0 0.5 0 0 0</pose>
       <link name="link">
-        <collision name="c"><geometry><box><size>0.2 8.0 1</size></box></geometry></collision>
+        <collision name="c"><geometry><box><size>0.2 14.0 1</size></box></geometry></collision>
         <visual name="v">
-          <geometry><box><size>0.2 8.0 1</size></box></geometry>
+          <geometry><box><size>0.2 14.0 1</size></box></geometry>
           <material><diffuse>0.6 0.8 1.0 1</diffuse></material>
         </visual>
       </link>
@@ -74,11 +74,11 @@
 
     <model name="wall_right">
       <static>true</static>
-      <pose>6.6 0 0.5 0 0 0</pose>
+      <pose>10.0 0 0.5 0 0 0</pose>
       <link name="link">
-        <collision name="c"><geometry><box><size>0.2 8.0 1</size></box></geometry></collision>
+        <collision name="c"><geometry><box><size>0.2 14.0 1</size></box></geometry></collision>
         <visual name="v">
-          <geometry><box><size>0.2 8.0 1</size></box></geometry>
+          <geometry><box><size>0.2 14.0 1</size></box></geometry>
           <material><diffuse>0.6 0.8 1.0 1</diffuse></material>
         </visual>
       </link>
