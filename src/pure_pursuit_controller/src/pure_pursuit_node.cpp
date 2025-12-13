@@ -119,13 +119,13 @@ private:
 
         // Pure Pursuit Formula
         double wheelbase = 0.3;
-        double steering_angle = ata| CTE: %.2f | Target: (%.2f, %.2f) | Speed: %.2f | AngVel: %.2f",
-                current_x, current_y, cross_track_error, target_point.x, target_point.y, speed, angular_velocity);
-        }
-
-        // 5. Publish Command
-        auto cmd = geometry_msgs::msg::Twist();
-        cmd.linear.x = speed angular velocity for Ackermann vehicle
+        double steering_angle = atan(2.0 * wheelbase * sin(alpha) / lookahead_distance_);
+        
+        // Adaptive speed based on steering angle (slow down on sharp turns)
+        double speed = target_speed_ * (1.0 - 0.3 * fabs(steering_angle));
+        speed = std::max(0.5, speed);  // Minimum speed 0.5 m/s
+        
+        // Convert steering angle to angular velocity for Ackermann vehicle
         double angular_velocity = (speed * tan(steering_angle)) / wheelbase;
         
         // Limit angular velocity to prevent too sharp turns
@@ -136,13 +136,13 @@ private:
         static int debug_counter = 0;
         if (debug_counter++ % 20 == 0) {
             RCLCPP_INFO(this->get_logger(), 
-                "Pos: (%.2f, %.2f) Yaw: %.2f | Target: (%.2f, %.2f) | Steer: %.2f | AngVel: %.2f",
-                current_x, current_y, current_yaw, target_point.x, target_point.y, steering_angle, angular_velocity);
+                "Pos: (%.2f, %.2f) | CTE: %.2f | Target: (%.2f, %.2f) | Speed: %.2f | AngVel: %.2f",
+                current_x, current_y, cross_track_error, target_point.x, target_point.y, speed, angular_velocity);
         }
 
         // 5. Publish Command
         auto cmd = geometry_msgs::msg::Twist();
-        cmd.linear.x = target_speed_;
+        cmd.linear.x = speed;
         cmd.angular.z = angular_velocity;
         publisher_->publish(cmd);
     }
