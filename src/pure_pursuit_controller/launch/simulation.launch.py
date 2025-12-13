@@ -10,7 +10,8 @@ def generate_launch_description():
     pkg_share = get_package_share_directory(pkg_name)
 
     # 1. Path to SDF World
-    world_file = os.path.join(pkg_share, 'worlds', 'oval_track.sdf')
+    # world_file = os.path.join(pkg_share, 'worlds', 'oval_track.sdf')
+    world_file = os.path.join(pkg_share, 'worlds', 'line_track.sdf')
     
     # 2. Path to URDF
     urdf_file = os.path.join(pkg_share, 'urdf', 'ackermann_car.urdf')
