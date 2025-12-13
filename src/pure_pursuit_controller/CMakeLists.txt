@@ -21,11 +21,12 @@ install(TARGETS
   DESTINATION lib/${PROJECT_NAME}
 )
 
-# Install directories (URDF, Worlds, Waypoints)
+# Install directories (URDF, Worlds, Waypoints, Launch files)
 install(DIRECTORY
   urdf
   worlds
   src
+  launch
   DESTINATION share/${PROJECT_NAME}
 )
 
