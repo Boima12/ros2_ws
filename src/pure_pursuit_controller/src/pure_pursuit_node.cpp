@@ -18,11 +18,13 @@ class PurePursuitNode : public rclcpp::Node {
 public:
     PurePursuitNode() : Node("pure_pursuit_node") {
         // Tunable parameters
-        this->declare_parameter("lookahead_distance", 2.5); // Increased to 2.5 for obstacle avoidance
-        this->declare_parameter("target_speed", 1.2);       
+        this->declare_parameter("lookahead_distance", 1.5); // Reduced for tighter path tracking
+        this->declare_parameter("target_speed", 1.5);       
+        this->declare_parameter("cross_track_gain", 0.8);   // Gain for cross-track error correction
         
         lookahead_distance_ = this->get_parameter("lookahead_distance").as_double();
         target_speed_ = this->get_parameter("target_speed").as_double();
+        cross_track_gain_ = this->get_parameter("cross_track_gain").as_double();
 
         // Load Waypoints
         std::string pkg_path = ament_index_cpp::get_package_share_directory("pure_pursuit_controller");
@@ -70,11 +72,13 @@ private:
         // 1. Find the index of the closest point on the path
         size_t closest_index = 0;
         double min_dist = 1e9;
+        double cross_track_error = 0.0;
         for (size_t i = 0; i < path_.size(); ++i) {
             double dist = std::hypot(path_[i].x - current_x, path_[i].y - current_y);
             if (dist < min_dist) {
                 min_dist = dist;
                 closest_index = i;
+                cross_track_error = dist;
             }
         }
 
@@ -98,17 +102,34 @@ private:
         while (alpha > M_PI) alpha -= 2.0 * M_PI;
         while (alpha < -M_PI) alpha += 2.0 * M_PI;
 
-        // Pure Pursuit Formula
-        // Wheelbase L = 0.3 (approx)
-        double wheelbase = 0.3;
-        double steering_angle = atan(2.0 * wheelbase * sin(alpha) / lookahead_distance_);
+        // Calculate cross-track error direction (left or right of path)
+        double path_heading = atan2(target_point.y - path_[closest_index].y, 
+                                     target_point.x - path_[closest_index].x);
+        double heading_error = path_heading - current_yaw;
+        while (heading_error > M_PI) heading_error -= 2.0 * M_PI;
+        while (heading_error < -M_PI) heading_error += 2.0 * M_PI;
         
-        // Convert steering angle to angular velocity for Ackermann vehicle
-        // angular_velocity = (velocity * tan(steering_angle)) / wheelbase
-        double angular_velocity = (target_speed_ * tan(steering_angle)) / wheelbase;
+        // Add cross-track error correction to alpha
+        double cross_track_correction = cross_track_gain_ * cross_track_error * sin(heading_error);
+        alpha += cross_track_correction;
+        
+        // Normalize alpha again after correction
+        while (alpha > M_PI) alpha -= 2.0 * M_PI;
+        while (alpha < -M_PI) alpha += 2.0 * M_PI;
+
+        // Pure Pursuit Formula
+        double wheelbase = 0.3;
+        double steering_angle = ata| CTE: %.2f | Target: (%.2f, %.2f) | Speed: %.2f | AngVel: %.2f",
+                current_x, current_y, cross_track_error, target_point.x, target_point.y, speed, angular_velocity);
+        }
+
+        // 5. Publish Command
+        auto cmd = geometry_msgs::msg::Twist();
+        cmd.linear.x = speed angular velocity for Ackermann vehicle
+        double angular_velocity = (speed * tan(steering_angle)) / wheelbase;
         
         // Limit angular velocity to prevent too sharp turns
-        double max_angular_vel = 2.0;  // rad/s
+        double max_angular_vel = 3.0;  // rad/s (increased for sharper turns)
         angular_velocity = std::max(-max_angular_vel, std::min(max_angular_vel, angular_velocity));
 
         // 4. Debug Print (Only every 20th message to reduce spam)
@@ -131,6 +152,7 @@ private:
     std::vector<Point> path_;
     double lookahead_distance_;
     double target_speed_;
+    double cross_track_gain_;
 };
 
 int main(int argc, char** argv) {
