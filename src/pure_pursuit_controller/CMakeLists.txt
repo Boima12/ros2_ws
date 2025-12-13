@@ -21,11 +21,17 @@ install(TARGETS
   DESTINATION lib/${PROJECT_NAME}
 )
 
-# Install directories (URDF, Worlds, Waypoints, Launch files)
+# --- THE FIX IS HERE ---
+# We install waypoints.txt directly to share/pure_pursuit_controller/
+install(FILES
+  src/waypoints.txt
+  DESTINATION share/${PROJECT_NAME}
+)
+# -----------------------
+
 install(DIRECTORY
   urdf
   worlds
-  src
   launch
   DESTINATION share/${PROJECT_NAME}
 )

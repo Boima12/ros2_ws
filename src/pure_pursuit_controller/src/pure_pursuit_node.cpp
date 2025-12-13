@@ -17,9 +17,9 @@ struct Point {
 class PurePursuitNode : public rclcpp::Node {
 public:
     PurePursuitNode() : Node("pure_pursuit_node") {
-        // Parameters
-        this->declare_parameter("lookahead_distance", 1.5);
-        this->declare_parameter("target_speed", 1.0);
+        // Tunable parameters
+        this->declare_parameter("lookahead_distance", 2.0); // Increased to 2.0 for smoother steering
+        this->declare_parameter("target_speed", 1.5);       
         
         lookahead_distance_ = this->get_parameter("lookahead_distance").as_double();
         target_speed_ = this->get_parameter("target_speed").as_double();
@@ -29,7 +29,6 @@ public:
         std::string file_path = pkg_path + "/waypoints.txt";
         loadWaypoints(file_path);
 
-        // Pub/Sub
         publisher_ = this->create_publisher<geometry_msgs::msg::Twist>("/cmd_vel", 10);
         subscription_ = this->create_subscription<nav_msgs::msg::Odometry>(
             "/odom", 10, std::bind(&PurePursuitNode::odomCallback, this, std::placeholders::_1));
@@ -45,8 +44,9 @@ private:
             return;
         }
         double x, y;
-        char comma;
-        while (file >> x >> comma >> y) {
+        while (file >> x) {
+            if (file.peek() == ',') file.ignore();
+            file >> y;
             path_.push_back({x, y});
         }
     }
@@ -54,11 +54,10 @@ private:
     void odomCallback(const nav_msgs::msg::Odometry::SharedPtr msg) {
         if (path_.empty()) return;
 
-        // 1. Get current vehicle state
         double current_x = msg->pose.pose.position.x;
         double current_y = msg->pose.pose.position.y;
 
-        // Get Yaw from Quaternion
+        // Convert Quaternion to Yaw
         tf2::Quaternion q(
             msg->pose.pose.orientation.x,
             msg->pose.pose.orientation.y,
@@ -68,7 +67,7 @@ private:
         double roll, pitch, current_yaw;
         m.getRPY(roll, pitch, current_yaw);
 
-        // 2. Find closest point on path to determine where to start looking
+        // 1. Find the index of the closest point on the path
         size_t closest_index = 0;
         double min_dist = 1e9;
         for (size_t i = 0; i < path_.size(); ++i) {
@@ -79,25 +78,42 @@ private:
             }
         }
 
-        // 3. Find Lookahead Point
+        // 2. Find Lookahead Point (Search forward from closest, wrapping around)
         Point target_point = path_[closest_index];
-        for (size_t i = closest_index; i < path_.size(); ++i) {
-            double dist = std::hypot(path_[i].x - current_x, path_[i].y - current_y);
+        for (size_t i = 0; i < path_.size(); ++i) {
+            size_t idx = (closest_index + i) % path_.size(); // Modulo handles the loop
+            double dist = std::hypot(path_[idx].x - current_x, path_[idx].y - current_y);
             if (dist >= lookahead_distance_) {
-                target_point = path_[i];
+                target_point = path_[idx];
                 break;
             }
         }
 
-        // 4. Calculate curvature / steering angle
-        double alpha = atan2(target_point.y - current_y, target_point.x - current_x) - current_yaw;
-        double steering_angle = atan(2.0 * 0.3 * sin(alpha) / lookahead_distance_); // 0.3 is wheelbase
+        // 3. Calculate Steering Angle
+        double dx = target_point.x - current_x;
+        double dy = target_point.y - current_y;
+        double alpha = atan2(dy, dx) - current_yaw;
+
+        // --- FIX: Normalize Angle to [-pi, pi] ---
+        while (alpha > M_PI) alpha -= 2.0 * M_PI;
+        while (alpha < -M_PI) alpha += 2.0 * M_PI;
+
+        // Pure Pursuit Formula
+        // Wheelbase L = 0.3 (approx)
+        double steering_angle = atan(2.0 * 0.3 * sin(alpha) / lookahead_distance_); 
+
+        // 4. Debug Print (Only every 20th message to reduce spam)
+        static int debug_counter = 0;
+        if (debug_counter++ % 20 == 0) {
+            RCLCPP_INFO(this->get_logger(), 
+                "Pos: (%.2f, %.2f) Yaw: %.2f | Target: (%.2f, %.2f) | Steer: %.2f",
+                current_x, current_y, current_yaw, target_point.x, target_point.y, steering_angle);
+        }
 
         // 5. Publish Command
         auto cmd = geometry_msgs::msg::Twist();
         cmd.linear.x = target_speed_;
-        cmd.angular.z = steering_angle; // For ackermann sim, we often map angular.z to steering angle
-        
+        cmd.angular.z = steering_angle;
         publisher_->publish(cmd);
     }
 
