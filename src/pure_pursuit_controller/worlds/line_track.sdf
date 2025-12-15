@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <sdf version="1.8">
-  <world name="figure_8_walls">
+  <world name="line_track">
 
     <physics name="1ms" type="ignored">
       <max_step_size>0.004</max_step_size>
@@ -18,7 +18,7 @@
       <specular>0.2 0.2 0.2 1</specular>
       <direction>-0.5 0.1 -0.9</direction>
     </light>
-
+    
     <model name="ground_plane">
       <static>true</static>
       <link name="link">
@@ -41,10 +41,8 @@
       <static>true</static>
       <pose>0 8.5 0.5 0 0 0</pose>
       <link name="link">
-        <collision name="c"><geometry><box><size>24.0 0.2 1</size></box></geometry></collision>
-        <visual name="v">
-          <geometry><box><size>24.0 0.2 1</size></box></geometry>
-          <material><diffuse>0.6 0.8 1.0 1</diffuse></material> </visual>
+        <collision name="c"><geometry><box><size>23.8 0.2 1</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>23.8 0.2 1</size></box></geometry><material><diffuse>0.6 0.8 1.0 1</diffuse></material></visual>
       </link>
     </model>
     
@@ -52,57 +50,38 @@
       <static>true</static>
       <pose>0 -8.5 0.5 0 0 0</pose>
       <link name="link">
-        <collision name="c"><geometry><box><size>24.0 0.2 1</size></box></geometry></collision>
-        <visual name="v">
-          <geometry><box><size>24.0 0.2 1</size></box></geometry>
-          <material><diffuse>0.6 0.8 1.0 1</diffuse></material>
-        </visual>
+        <collision name="c"><geometry><box><size>23.8 0.2 1</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>23.8 0.2 1</size></box></geometry><material><diffuse>0.6 0.8 1.0 1</diffuse></material></visual>
       </link>
     </model>
-
+    
     <model name="wall_left">
       <static>true</static>
       <pose>-12.0 0 0.5 0 0 0</pose>
       <link name="link">
-        <collision name="c"><geometry><box><size>0.2 18.0 1</size></box></geometry></collision>
-        <visual name="v">
-          <geometry><box><size>0.2 18.0 1</size></box></geometry>
-          <material><diffuse>0.6 0.8 1.0 1</diffuse></material>
-        </visual>
+        <collision name="c"><geometry><box><size>0.2 17.2 1</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>0.2 17.2 1</size></box></geometry><material><diffuse>0.6 0.8 1.0 1</diffuse></material></visual>
       </link>
     </model>
-
+    
     <model name="wall_right">
       <static>true</static>
       <pose>12.0 0 0.5 0 0 0</pose>
       <link name="link">
-        <collision name="c"><geometry><box><size>0.2 18.0 1</size></box></geometry></collision>
+        <collision name="c"><geometry><box><size>0.2 17.2 1</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>0.2 17.2 1</size></box></geometry><material><diffuse>0.6 0.8 1.0 1</diffuse></material></visual>
+      </link>
+    </model>
+
+    <model name="line_obstacle">
+      <static>true</static>
+      <pose>0 -1 0.5 0 0 0</pose>
+      <link name="link">
+        <collision name="c"><geometry><box><size>10.0 0.1 1</size></box></geometry></collision>
         <visual name="v">
-          <geometry><box><size>0.2 18.0 1</size></box></geometry>
-          <material><diffuse>0.6 0.8 1.0 1</diffuse></material>
+          <geometry><box><size>10.0 0.1 1</size></box></geometry>
+          <material><diffuse>1 0.4 0.4 1</diffuse></material>
         </visual>
-      </link>
-    </model>
-
-    <model name="cylinder_obstacle_1">
-      <static>true</static>
-      <pose>-5 0 0.5 0 0 0</pose>
-      <link name="link">
-        <collision name="c"><geometry><cylinder><radius>0.2</radius><length>1</length></cylinder></geometry></collision>
-        <visual name="v">
-          <geometry><cylinder><radius>0.2</radius><length>1</length></cylinder></geometry>
-          <material><diffuse>1 0.4 0.4 1</diffuse></material> </visual>
-      </link>
-    </model>
-
-    <model name="cylinder_obstacle_2">
-      <static>true</static>
-      <pose>5 0 0.5 0 0 0</pose>
-      <link name="link">
-        <collision name="c"><geometry><cylinder><radius>0.2</radius><length>1</length></cylinder></geometry></collision>
-        <visual name="v">
-          <geometry><cylinder><radius>0.2</radius><length>1</length></cylinder></geometry>
-          <material><diffuse>1 0.4 0.4 1</diffuse></material> </visual>
       </link>
     </model>
 

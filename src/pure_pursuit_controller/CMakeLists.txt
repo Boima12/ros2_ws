@@ -5,32 +5,35 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
-# 1. Tim thu vien
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(geometry_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
-find_package(ackermann_msgs REQUIRED)
+find_package(tf2 REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
+find_package(ament_index_cpp REQUIRED)
 
-# 2. Tao file thuc thi tu code C++
-add_executable(control_node src/control_node.cpp)
+add_executable(pure_pursuit_node src/pure_pursuit_node.cpp)
+ament_target_dependencies(pure_pursuit_node rclcpp geometry_msgs nav_msgs tf2 tf2_geometry_msgs ament_index_cpp)
 
-# 3. Link thu vien vao file thuc thi
-ament_target_dependencies(control_node
-  rclcpp
-  nav_msgs
-  ackermann_msgs
-)
-
-# 4. Cai dat (De lenh ros2 run tim thay node)
 install(TARGETS
-  control_node
+  pure_pursuit_node
   DESTINATION lib/${PROJECT_NAME}
 )
 
-ament_package()
-
-# Install URDF and World directories
-install(
-  DIRECTORY urdf worlds launch
+# --- THE FIX IS HERE ---
+# We install waypoints.txt directly to share/pure_pursuit_controller/
+install(FILES
+  src/waypoints.txt
   DESTINATION share/${PROJECT_NAME}
 )
+# -----------------------
+
+install(DIRECTORY
+  urdf
+  worlds
+  launch
+  DESTINATION share/${PROJECT_NAME}
+)
+
+ament_package()
