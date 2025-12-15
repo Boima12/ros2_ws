@@ -18,9 +18,9 @@ class PurePursuitNode : public rclcpp::Node {
 public:
     PurePursuitNode() : Node("pure_pursuit_node") {
         // Tunable parameters
-        this->declare_parameter("lookahead_distance", 1.5); // Reduced for tighter path tracking
-        this->declare_parameter("target_speed", 1.5);       
-        this->declare_parameter("cross_track_gain", 0.8);   // Gain for cross-track error correction
+        this->declare_parameter("lookahead_distance", 1.7); // Reduced for tighter path tracking
+        this->declare_parameter("target_speed", 1.4);       
+        this->declare_parameter("cross_track_gain", 0.6);   // Gain for cross-track error correction
         
         lookahead_distance_ = this->get_parameter("lookahead_distance").as_double();
         target_speed_ = this->get_parameter("target_speed").as_double();
